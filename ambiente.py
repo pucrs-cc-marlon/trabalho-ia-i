@@ -23,6 +23,7 @@ class Ambiente:
         return data
 
     def colocar_paredes(self, data):
+        # TODO: Colocar as LIXEIRAS e o CARREGADOR
         ialtura_parede = len(data)/3
         espaco_altura_parede = ialtura_parede/2
 
