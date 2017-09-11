@@ -23,7 +23,6 @@ class Ambiente:
         return mapa
 
     def colocar_paredes(self, mapa):
-        # TODO: Colocar as LIXEIRAS e o CARREGADOR
         ialtura_parede = len(mapa) / 3
         espaco_altura_parede = ialtura_parede/2
 
