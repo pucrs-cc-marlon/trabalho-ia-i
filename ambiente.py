@@ -15,36 +15,53 @@ class Ambiente:
         self.aspirador = self.criar_aspirador(t, c)
 
     def gerar_ambiente(self, n):
-        data = [[LIMPO for cell in range(n)] for row in range(n)]
+        mapa = [[LIMPO for cell in range(n)] for row in range(n)]
 
-        data = self.colocar_paredes(data)
+        mapa = self.colocar_paredes(mapa)
 
-        data = self.colocar_lixo(data)
-        return data
+        mapa = self.colocar_lixo(mapa)
+        return mapa
 
-    def colocar_paredes(self, data):
+    def colocar_paredes(self, mapa):
         # TODO: Colocar as LIXEIRAS e o CARREGADOR
-        ialtura_parede = len(data)/3
+        ialtura_parede = len(mapa) / 3
         espaco_altura_parede = ialtura_parede/2
 
-        ilargura_parede = len(data)/3
-        largura_parede = len(data) - ilargura_parede
-        # Colocando Paredes
-        for i in range(int(espaco_altura_parede), len(data)-int(espaco_altura_parede)):
-            data[i][int(ilargura_parede)-1] = PAREDE
-            data[i][int(largura_parede)] = PAREDE
+        ilargura_parede = len(mapa) / 3
+        largura_parede = len(mapa) - ilargura_parede
 
-        return data
+        if len(mapa) > 5:
+            for i in range(int(espaco_altura_parede), len(mapa)-int(espaco_altura_parede)):
+                mapa[i][int(ilargura_parede) - 1] = PAREDE
+                mapa[i][int(largura_parede)] = PAREDE
+            # Colocando as Lixeiras
+            for i in range(0, 3):
+                mapa[randint(0, len(mapa) - 1)][randint(int(largura_parede) + 1, len(mapa) - 1)] = LIXEIRA
+                mapa[randint(0, len(mapa) - 1)][randint(0, int(ilargura_parede) - 2)] = LIXEIRA
 
-    def colocar_lixo(self, data):
-        total = len(data) * (randint(40, 85) / 100)
-        for i in range(len(data)):
+            for i in range(0, 2):
+                mapa[randint(0, len(mapa) - 1)][randint(int(largura_parede) + 1, len(mapa) - 1)] = CARREGADOR
+                mapa[randint(0, len(mapa) - 1)][randint(0, int(ilargura_parede) - 2)] = CARREGADOR
+        else:
+            for i in range(0, 3):
+                mapa[randint(0, len(mapa) - 1)][randint(0, len(mapa) - 1)] = LIXEIRA
+                mapa[randint(0, len(mapa) - 1)][randint(0, len(mapa) - 1)] = LIXEIRA
+
+            for i in range(0, 2):
+                mapa[randint(0, len(mapa) - 1)][randint(0, len(mapa) - 1)] = CARREGADOR
+                mapa[randint(0, len(mapa) - 1)][randint(0, len(mapa) - 1)] = CARREGADOR
+
+        return mapa
+
+    def colocar_lixo(self, mapa):
+        # Sorteia aleatóriamente a porcentagem de distribuição do Lixo
+        total = len(mapa) * (randint(40, 85) / 100)
+        for i in range(len(mapa)):
             for j in range(int(total)):
-                pos = randint(0, len(data) - 1)
-                if data[i][pos] != PAREDE:
-                    data[i][pos] = LIXO
-
-        return data
+                pos = randint(0, len(mapa) - 1)
+                if mapa[i][pos] != PAREDE and mapa[i][pos] != LIXEIRA and mapa[i][pos] != CARREGADOR:
+                    mapa[i][pos] = LIXO
+        return mapa
 
     def imprimir_ambiente(self):
         str_imprimir = ""
