@@ -19,7 +19,7 @@ SUPERIOR = 2
 CUSTO_MOVIMENTO = 0.5
 CUSTO_ASPIRAR = 0.5
 
-PORCENTAGEM_CRITICA = 10.0
+PORCENTAGEM_CRITICA = 10
 
 
 class Aspirador:
@@ -35,13 +35,20 @@ class Aspirador:
         status = len(self.repositorio) >= self.tamanho_repositorio
         return status
 
+    def esta_sem_bateria(self):
+        status = self.carga <= 0
+        return status
+
     def nivel_critico_bateria(self):
         # Sendo 10% o nível crítico de bateria
-        return ((self.carga/self.carga_maxima) * 100) <= PORCENTAGEM_CRITICA
+        status = ((self.carga/self.carga_maxima) * 100) <= PORCENTAGEM_CRITICA
+        return status
 
     def mover_limpando(self, ambiente, direcao=MOVER_BAIXO):
         direcao = direcao
         while len(ambiente.pontos_lixos) != 0:
+            if self.nivel_critico_bateria():
+                self.carregar_bateria(ambiente)
             if self.repositorio_cheio():
                 self.descarregar(ambiente)
             if self.posicao == Ponto(ambiente.tamanho-1, ambiente.tamanho-1):
@@ -76,6 +83,8 @@ class Aspirador:
         print("Buscando lixo restante")
         pontos_lixo = copy(ambiente.pontos_lixos)
         for i in pontos_lixo:
+            if self.repositorio_cheio():
+                self.descarregar(ambiente)
             caminho = self.solucao_a_estrela(ambiente, i)[1]
             for j in caminho:
                 if j == MOVER_BAIXO:
@@ -86,6 +95,34 @@ class Aspirador:
                     self.mover_direita(ambiente)
                 elif j == MOVER_ESQUERDA:
                     self.mover_esquerda(ambiente)
+
+    def carregar_bateria(self, ambiente):
+        print("Deslocando para recarregar")
+        menor_distancia_recarga = min(ambiente.pontos_recargas, key=self.heuristica_posicao)
+        caminho = self.solucao_a_estrela(ambiente, menor_distancia_recarga)[1]
+        for j in caminho:
+            if j == MOVER_BAIXO:
+                self.mover_baixo(ambiente, False)
+            elif j == MOVER_CIMA:
+                self.mover_cima(ambiente, False)
+            elif j == MOVER_DIREITA:
+                self.mover_direita(ambiente, False)
+            elif j == MOVER_ESQUERDA:
+                self.mover_esquerda(ambiente, False)
+
+        print("Carregando a Bateria")
+        self.carga = self.carga_maxima
+        caminho.reverse()
+        print("Voltando para o ponto de origem")
+        for j in caminho:
+            if j == MOVER_BAIXO:
+                self.mover_baixo(ambiente, False)
+            elif j == MOVER_CIMA:
+                self.mover_cima(ambiente, False)
+            elif j == MOVER_DIREITA:
+                self.mover_direita(ambiente, False)
+            elif j == MOVER_ESQUERDA:
+                self.mover_esquerda(ambiente, False)
 
     def descarregar(self, ambiente):
         print("Deslocando para a lixeira")
@@ -162,11 +199,16 @@ class Aspirador:
             if quadrado != PAREDE and quadrado != LIXEIRA and quadrado != CARREGADOR:
                 antiga_posicao = self.posicao
                 self.posicao = Ponto(self.posicao.x + 1, self.posicao.y)
+                self.carga -= CUSTO_MOVIMENTO
                 if limpar:
                     self.limpar(ambiente)
                 ambiente.ambiente[self.posicao.y][self.posicao.x] = ASPIRADOR
                 ambiente.ambiente[antiga_posicao.y][antiga_posicao.x] = LIMPO
                 print(ambiente)
+                # if self.esta_sem_bateria():
+                #     raise Exception("O Aspirador ficou sem bateria")
+                # if self.nivel_critico_bateria():
+                #     self.carregar_bateria(ambiente)
                 return True, None
             else:
                 return False, OBSTACULO
@@ -176,13 +218,18 @@ class Aspirador:
         if self.posicao.x - 1 >= 0:
             quadrado = ambiente.situacao(self.posicao.x - 1, self.posicao.y)
             if quadrado != PAREDE and quadrado != LIXEIRA and quadrado != CARREGADOR:
+                # if self.nivel_critico_bateria():
+                #     self.carregar_bateria(ambiente)
                 antiga_posicao = self.posicao
                 self.posicao = Ponto(self.posicao.x - 1, self.posicao.y)
+                self.carga -= CUSTO_MOVIMENTO
                 if limpar:
                     self.limpar(ambiente)
                 ambiente.ambiente[self.posicao.y][self.posicao.x] = ASPIRADOR
                 ambiente.ambiente[antiga_posicao.y][antiga_posicao.x] = LIMPO
                 print(ambiente)
+                # if self.esta_sem_bateria():
+                #     raise Exception("O Aspirador ficou sem bateria")
                 return True, None
             else:
                 return False, OBSTACULO
@@ -192,13 +239,18 @@ class Aspirador:
         if self.posicao.y + 1 < ambiente.tamanho:
             quadrado = ambiente.situacao(self.posicao.x, self.posicao.y + 1)
             if quadrado != PAREDE and quadrado != LIXEIRA and quadrado != CARREGADOR:
+                # if self.nivel_critico_bateria():
+                #     self.carregar_bateria(ambiente)
                 antiga_posicao = self.posicao
                 self.posicao = Ponto(self.posicao.x, self.posicao.y + 1)
+                self.carga -= CUSTO_MOVIMENTO
                 if limpar:
                     self.limpar(ambiente)
                 ambiente.ambiente[self.posicao.y][self.posicao.x] = ASPIRADOR
                 ambiente.ambiente[antiga_posicao.y][antiga_posicao.x] = LIMPO
                 print(ambiente)
+                # if self.esta_sem_bateria():
+                #     raise Exception("O Aspirador ficou sem bateria")
                 return True, None
             else:
                 return False, OBSTACULO
@@ -208,13 +260,18 @@ class Aspirador:
         if self.posicao.y - 1 >= 0:
             quadrado = ambiente.situacao(self.posicao.x, self.posicao.y - 1)
             if quadrado != PAREDE and quadrado != LIXEIRA and quadrado != CARREGADOR:
+                # if self.nivel_critico_bateria():
+                #     self.carregar_bateria(ambiente)
                 antiga_posicao = self.posicao
                 self.posicao = Ponto(self.posicao.x, self.posicao.y - 1)
+                self.carga -= CUSTO_MOVIMENTO
                 if limpar:
                     self.limpar(ambiente)
                 ambiente.ambiente[self.posicao.y][self.posicao.x] = ASPIRADOR
                 ambiente.ambiente[antiga_posicao.y][antiga_posicao.x] = LIMPO
                 print(ambiente)
+                # if self.esta_sem_bateria():
+                #     raise Exception("O Aspirador ficou sem bateria")
                 return True, None
             else:
                 return False, OBSTACULO
