@@ -4,10 +4,11 @@ from ambiente import *
 
 class Main:
     def __init__(self):
-        self.ambiente = Ambiente(4, 0, 0)
+        self.ambiente = Ambiente(12, 1, 0)
         self.aspirador = Aspirador(10, 10)
-
         self.aspirador.mover_limpando(self.ambiente)
+
+        print(self.ambiente)
 
 
 if __name__ == "__main__":

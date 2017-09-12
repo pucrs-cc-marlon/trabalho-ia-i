@@ -37,7 +37,7 @@ class Player:
     def setup(self, map):
         self.x = map.start.x * TILE_WIDTH
         self.y = map.start.y * TILE_HEIGHT - self.diff_height
-        self.route = PathFinder_A_Star().solve(map)
+        self.route = PathFinder_A_Star().solucao_a_estrela(map)
         self.action = None
 
     # ------------------------------------------
